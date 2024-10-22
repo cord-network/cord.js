@@ -3238,7 +3238,8 @@ declare module '@polkadot/api-base/types/submittable' {
        * - `origin`: The origin of the transaction, signed by the creator.
        * - `registry_id`: A unique code created to identify the registry.
        * - `digest`: The digest representing the registry data to be created.
-       * - `blob`: Optional metadata or data associated with the registry.
+       * - `schema_id`: (Optional) A unique code represnting the Schema.
+       * - `blob`: (Optional) Metadata or data associated with the registry.
        * 
        * # Returns
        * - `DispatchResult`: Returns `Ok(())` if the registry is successfully created, or an
@@ -3526,6 +3527,22 @@ declare module '@polkadot/api-base/types/submittable' {
        * DispatchResult
        **/
       create: AugmentedSubmittable<(txSchema: Bytes | string | Uint8Array, authorization: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes, Bytes]>;
+    };
+    schemaAccounts: {
+      /**
+       * Create a new schema and associates with its identifier.
+       * `create` takes a `InputSchemaOf<T>` and returns a `DispatchResult`
+       * 
+       * Arguments:
+       * 
+       * * `origin`: The origin of the transaction.
+       * * `tx_schema`: The schema that is being anchored.
+       * 
+       * Returns:
+       * 
+       * DispatchResult
+       **/
+      create: AugmentedSubmittable<(txSchema: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes]>;
     };
     session: {
       /**

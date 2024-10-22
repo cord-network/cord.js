@@ -467,6 +467,9 @@ declare module '@polkadot/api-base/types/consts' {
     schema: {
       maxEncodedSchemaLength: u32 & AugmentedConst<ApiType>;
     };
+    schemaAccounts: {
+      maxEncodedSchemaLength: u32 & AugmentedConst<ApiType>;
+    };
     statement: {
       /**
        * Maximum entires supported per batch call
