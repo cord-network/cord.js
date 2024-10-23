@@ -1,4 +1,5 @@
 import type { DidUri } from './DidDocument'
+import type { SchemaUri } from './Schema.js';
 import { HexString } from './Imported.js'
 
 export const REGISTRY_IDENT = 9274;
@@ -16,14 +17,12 @@ export interface RegistryDetails {
     authorizationUri: RegistryAuthorizationUri
 }
 
-// TODO: Fix schemaId once schema-acc pallet becomes active
-// TODO: Handle creatorUri as Did.
 export interface IRegistryCreate {
     uri: RegistryUri
     creatorUri: DidUri
     digest: RegistryDigest
     blob: string | null
-    schemaId: string | null 
+    schemaUri: SchemaUri | null
     authorizationUri: RegistryAuthorizationUri
 }
 

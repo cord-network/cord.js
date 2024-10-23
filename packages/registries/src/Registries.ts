@@ -72,6 +72,7 @@ import type {
   RegistryDigest,
   RegistryAuthorizationUri,
   RegistryUri,
+  SchemaUri
 } from '@cord.network/types';
 
 import {
@@ -392,7 +393,7 @@ export async function decodeCborToStringifiedBlob(
 export async function registryCreateProperties(
   creatorAddress: string,
   digest: HexString | null = null,
-  schemaId: string | null = null,
+  schemaUri: SchemaUri | null = null,
   blob: string | null = null, 
 ): Promise<IRegistryCreate> {
   
@@ -446,7 +447,7 @@ export async function registryCreateProperties(
     creatorUri,
     digest,
     blob,
-    schemaId,
+    schemaUri,
     authorizationUri,
   }
 }

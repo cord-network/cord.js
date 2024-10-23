@@ -76,6 +76,8 @@ import { SDKErrors } from '@cord.network/utils'
 
 import { ConfigService } from '@cord.network/config'
 
+import { doesSchemaIdExists } from '@cord.network/schema-accounts';
+
 import { 
     IRegistryCreate, IRegistryUpdate,
     RegistryAuthorizationUri,
@@ -196,6 +198,18 @@ export async function dispatchCreateRegistryToChain(
         authorizationUri: registryDetails.authorizationUri
     }
 
+    let schemaId = null;
+    if (registryDetails.schemaUri) {
+        const schemaExists = await doesSchemaIdExists(registryDetails.schemaUri);
+        if (!schemaExists) {
+            throw new SDKErrors.CordDispatchError(
+                `Schema does not exists at URI: "${registryDetails.schemaUri}".`
+            );
+        }
+
+        schemaId = uriToIdentifier(registryDetails.schemaUri);
+    }
+
     const registryExists = await isRegistryStored(registryDetails.uri);
 
     if (registryExists) {
@@ -211,7 +225,7 @@ export async function dispatchCreateRegistryToChain(
         const extrinsic = api.tx.registries.create(
             registryId,
             registryDetails.digest,
-            registryDetails.schemaId,
+            schemaId,
             registryDetails.blob
         );
 

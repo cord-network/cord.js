@@ -38,6 +38,36 @@ async function main() {
   let tx = await api.tx.balances.transferAllowDeath(authorIdentity.address, new BN('1000000000000000'));
   await Cord.Chain.signAndSubmitTx(tx, authorityAuthorIdentity);
 
+  // Create a Schema
+  console.log(`\n❄️  Schema Creation `)
+  let newSchemaContent = require('../../res/schema.json')
+  let newSchemaName = newSchemaContent.title + ':' + Cord.Utils.UUID.generate()
+  newSchemaContent.title = newSchemaName
+
+  let schemaProperties = Cord.SchemaAccounts.buildFromProperties(
+    newSchemaContent,
+    authorIdentity.address,
+  )
+  console.dir(schemaProperties, {
+    depth: null,
+    colors: true,
+  })
+  const schemaUri = await Cord.SchemaAccounts.dispatchToChain(
+    schemaProperties.schema,
+    authorIdentity,
+  )
+  console.log(`✅ Schema - ${schemaUri} - added!`)
+
+  console.log(`\n❄️  Query From Chain - Schema `)
+  const schemaFromChain = await Cord.SchemaAccounts.fetchFromChain(
+    schemaProperties.schema.$id
+  )
+  console.dir(schemaFromChain, {
+    depth: null,
+    colors: true,
+  })
+  console.log('✅ Schema Functions Completed!')
+
   // Create a Registry.
   const blob = {
     "name": "Companies Registry",
@@ -76,7 +106,7 @@ async function main() {
   const registryDetails = await Cord.Registries.registryCreateProperties(
     authorIdentity.address,
     digest,            //digest
-    null,              //schemaId
+    schemaUri,         //schemaUri
     blob,              //blob
   );
 
