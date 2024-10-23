@@ -6,6 +6,8 @@ import { randomUUID } from 'crypto'
 import { addNetworkMember } from './utils/createAuthorities'
 import { createAccount } from './utils/createAccount'
 
+import { BN } from 'bn.js'
+
 function getChallenge(): string {
   return Cord.Utils.UUID.generate()
 }
@@ -41,6 +43,10 @@ async function main() {
 
   // Step 2: Setup Identities
   console.log(`\n❄️  Demo Identities (KeyRing)`)
+
+  let api = Cord.ConfigService.get('api')
+  let tx = await api.tx.balances.transferAllowDeath(authorIdentity.address, new BN('1000000000000000'));
+  await Cord.Chain.signAndSubmitTx(tx, authorityAuthorIdentity);
 
   /* Creating the DIDs for the different parties involved in the demo. */
   // Create Verifier DID
@@ -163,42 +169,42 @@ async function main() {
   )
   console.log(`✅  Chain Space Approved`)
 
-  // Step 3.5: Subspace
-  const subSpaceProperties = await Cord.ChainSpace.buildFromProperties(
-    issuerDid.uri
-  )
-  console.dir(subSpaceProperties, {
-    depth: null,
-    colors: true,
-  })
-  const subSpace = await Cord.ChainSpace.dispatchSubspaceCreateToChain(
-    subSpaceProperties,
-    issuerDid.uri,
-    authorIdentity,
-    200,
-    space.uri,
-    async ({ data }) => ({
-      signature: issuerKeys.authentication.sign(data),
-      keyType: issuerKeys.authentication.type,
-    })
-  )
-  console.dir(subSpace, {
-    depth: null,
-    colors: true,
-  })
-  console.log(`\n❄️  SubSpace is created`)
+  // // Step 3.5: Subspace
+  // const subSpaceProperties = await Cord.ChainSpace.buildFromProperties(
+  //   issuerDid.uri
+  // )
+  // console.dir(subSpaceProperties, {
+  //   depth: null,
+  //   colors: true,
+  // })
+  // const subSpace = await Cord.ChainSpace.dispatchSubspaceCreateToChain(
+  //   subSpaceProperties,
+  //   issuerDid.uri,
+  //   authorIdentity,
+  //   200,
+  //   space.uri,
+  //   async ({ data }) => ({
+  //     signature: issuerKeys.authentication.sign(data),
+  //     keyType: issuerKeys.authentication.type,
+  //   })
+  // )
+  // console.dir(subSpace, {
+  //   depth: null,
+  //   colors: true,
+  // })
+  // console.log(`\n❄️  SubSpace is created`)
 
-  const subSpaceTx = await Cord.ChainSpace.dispatchUpdateTxCapacityToChain(
-    subSpace.uri,
-    issuerDid.uri,
-    authorIdentity,
-    300,
-    async ({ data }) => ({
-      signature: issuerKeys.authentication.sign(data),
-      keyType: issuerKeys.authentication.type,
-    })
-  )
-  console.log(`\n❄️  SubSpace limit is updated`)
+  // const subSpaceTx = await Cord.ChainSpace.dispatchUpdateTxCapacityToChain(
+  //   subSpace.uri,
+  //   issuerDid.uri,
+  //   authorIdentity,
+  //   300,
+  //   async ({ data }) => ({
+  //     signature: issuerKeys.authentication.sign(data),
+  //     keyType: issuerKeys.authentication.type,
+  //   })
+  // )
+  // console.log(`\n❄️  SubSpace limit is updated`)
 
   // Step 4: Add Delelegate Two as Registry Delegate
   console.log(`\n❄️  Space Delegate Authorization `)

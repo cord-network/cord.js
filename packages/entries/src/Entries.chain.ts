@@ -47,11 +47,11 @@ import {
     IRegistryEntry,
     EntryUri,
     CordKeyringPair,
+    Option,
+    RegistryAuthorizationUri
 } from '@cord.network/types';
 
 import { Chain } from '@cord.network/network';
-
-import { Option } from '@polkadot/types';
 
 import { ConfigService } from '@cord.network/config'
 
@@ -213,4 +213,130 @@ export async function dispatchUpdateEntryToChain(
         `Error dispatching to chain: "${errorMessage}".`
     );
   }
+}
+
+
+/**
+ * Revokes a registry entry on the blockchain by dispatching an extrinsic.
+ * Ensures that the registry entry exists before attempting revocation.
+ *
+ * @param {EntryUri} registryEntryUri - The URI that identifies the registry entry to revoke.
+ * @param {RegistryAuthorizationUri} authorizationUri - The URI identifying the authorization for revocation.
+ * @param {CordKeyringPair} authorAccount - The account that signs and submits the transaction.
+ * 
+ * @returns {Promise<EntryUri>} - Resolves to the same `EntryUri` if revocation succeeds.
+ *
+ * @throws {SDKErrors.CordDispatchError} - Throws if the registry entry does not exist or if an error occurs during dispatch.
+ *
+ * @example
+ * try {
+ *   const revokedEntryUri = await dispatchRevokeToChain(
+ *     'entry-uri',
+ *     'authorization-uri',
+ *     authorAccount
+ *   );
+ *   console.log(`Successfully revoked: ${revokedEntryUri}`);
+ * } catch (error) {
+ *   console.error(`Revocation failed: ${error.message}`);
+ * }
+ */
+export async function dispatchRevokeEntryToChain(
+    registryEntryUri: EntryUri,
+    authorizationUri: RegistryAuthorizationUri,
+    authorAccount: CordKeyringPair,
+): Promise<EntryUri> {
+    
+    const registryEntryObj = uriToEntryIdAndDigest(registryEntryUri);
+
+    const registryEntryId = registryEntryObj.identifier;
+    const authorizationId = uriToIdentifier(authorizationUri);
+
+    const registryEntryExists = await isRegistryEntryStored(registryEntryId);
+    if (!registryEntryExists) {
+      throw new SDKErrors.CordDispatchError(
+        `Registry Entry does not exists at URI: "${registryEntryUri}".`
+      );
+    }
+
+    try {
+        const api = ConfigService.get('api')
+
+        const extrinsic = api.tx.entries.revoke(
+            registryEntryId,
+            authorizationId,
+        );
+
+        await Chain.signAndSubmitTx(extrinsic, authorAccount);
+
+        return registryEntryUri
+    } catch(error) {
+        const errorMessage =
+        error instanceof Error ? error.message : JSON.stringify(error)
+        throw new SDKErrors.CordDispatchError(
+        `Error dispatching to chain: "${errorMessage}".`
+        )
+    }
+}
+
+
+/**
+ * Reinstates a previously revoked registry entry on the blockchain.
+ * Validates the existence of the registry entry before attempting the reinstatement.
+ *
+ * @param {EntryUri} registryEntryUri - The URI that identifies the registry entry to reinstate.
+ * @param {RegistryAuthorizationUri} authorizationUri - The URI used to authorize the reinstatement.
+ * @param {CordKeyringPair} authorAccount - The account used to sign and submit the reinstatement transaction.
+ * 
+ * @returns {Promise<EntryUri>} - Resolves to the same `EntryUri` if the reinstatement succeeds.
+ *
+ * @throws {SDKErrors.CordDispatchError} - Throws if the registry entry does not exist or an error occurs during the transaction.
+ *
+ * @example
+ * try {
+ *   const reinstatedEntryUri = await dispatchReinstateToChain(
+ *     'entry-uri',
+ *     'authorization-uri',
+ *     authorAccount
+ *   );
+ *   console.log(`Successfully reinstated: ${reinstatedEntryUri}`);
+ * } catch (error) {
+ *   console.error(`Reinstatement failed: ${error.message}`);
+ * }
+ */
+export async function dispatchReinstateEntryToChain(
+    registryEntryUri: EntryUri,
+    authorizationUri: RegistryAuthorizationUri,
+    authorAccount: CordKeyringPair,
+): Promise<EntryUri> {
+    
+    const registryEntryObj = uriToEntryIdAndDigest(registryEntryUri);
+
+    const registryEntryId = registryEntryObj.identifier;
+    const authorizationId = uriToIdentifier(authorizationUri);
+
+    const registryEntryExists = await isRegistryEntryStored(registryEntryId);
+    if (!registryEntryExists) {
+      throw new SDKErrors.CordDispatchError(
+        `Registry Entry does not exists at URI: "${registryEntryUri}".`
+      );
+    }
+
+    try {
+        const api = ConfigService.get('api')
+
+        const extrinsic = api.tx.entries.reinstate(
+            registryEntryId,
+            authorizationId,
+        );
+
+        await Chain.signAndSubmitTx(extrinsic, authorAccount);
+
+        return registryEntryUri
+    } catch(error) {
+        const errorMessage =
+        error instanceof Error ? error.message : JSON.stringify(error)
+        throw new SDKErrors.CordDispatchError(
+        `Error dispatching to chain: "${errorMessage}".`
+        )
+    }
 }
