@@ -207,6 +207,26 @@ async function main() {
   );
 
   console.log('\n✅ Registry Entry updated!', registryEntryUpdate);
+
+  console.log(`\n❄️  Revoking Registry Entry`, registryEntryUpdateDetails.uri);
+
+  const registryEntryRevoke = await Cord.Entries.dispatchRevokeEntryToChain(
+    registryEntryUpdateDetails.uri,
+    registryEntryUpdateDetails.authorizationUri,
+    authorIdentity,
+  );
+
+  console.log('\n✅ Registry Entry revoked!', registryEntryRevoke);
+
+  console.log(`\n❄️  Reinstating Revoked Registry Entry`, registryEntryUpdateDetails.uri);
+
+  const registryEntryReinstate = await Cord.Entries.dispatchReinstateEntryToChain(
+    registryEntryUpdateDetails.uri,
+    registryEntryUpdateDetails.authorizationUri,
+    authorIdentity,
+  );
+
+  console.log('\n✅ Registry Entry reinstated!', registryEntryReinstate);
 }
 
 main()
