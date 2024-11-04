@@ -227,6 +227,21 @@ async function main() {
   );
 
   console.log('\n✅ Registry Entry reinstated!', registryEntryReinstate);
+
+  console.log(`\n❄️  Registry Entry verification `)
+
+  const verificationResult = await Cord.Entries.verifyAgainstInputProperties(
+    registryEntry,
+    updateEntryDigest,
+    `did:cord:3${authorIdentity.address}`,
+    registry.uri
+  )
+
+  if (verificationResult.isValid) {
+    console.log(`✅ Verification successful! "${registryEntry}" 🎉`)
+  } else {
+    console.log(`🚫 Verification failed! - "${verificationResult.message}" 🚫`)
+  }
 }
 
 main()

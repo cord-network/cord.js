@@ -47,20 +47,24 @@ import {
   blake2AsHex,
 } from "@cord.network/types";
 
+import { SDKErrors } from '@cord.network/utils';
+
+import { DataUtils } from '@cord.network/utils'
+
 import { 
-  SDKErrors,
-  DataUtils,
- } from '@cord.network/utils';
+  fetchRegistryEntryDetailsFromChain 
+} from "./Entries.chain";
 
 import {
   uriToIdentifier,
   updateRegistryEntryUri,
   buildRegistryEntryUri,
   checkIdentifier,
+  identifierToUri, 
+  uriToEntryIdAndDigest
 } from '@cord.network/identifier';
 
 import { ConfigService } from '@cord.network/config';
-
 
 /**
  * Generates a URI for a registry entry based on its digest, registry URI, and creator's address.
@@ -374,4 +378,119 @@ export async function updateEntriesProperties(
   }
 
   return registryEntryObj
+}
+
+
+/**
+ * Verifies the input properties of a registry entry URI against its corresponding chain state details.
+ * This function ensures that the provided digest, creator URI, and registry URI match the data retrieved
+ * from the blockchain. It also checks if the entry is revoked or if the URIs are mismatched.
+ *
+ * @param {EntryUri} registryEntryUri - The element's URI to be verified against the chain's registry entry.
+ * It should be of the form `entry:cord:IdDigest:Digest`.
+ * @param {HexString} digest - The expected digest (hash) associated with the registry entry.
+ * @param {DidUri} [creatorUri] - (Optional) The expected DID of the creator of the registry entry.
+ * @param {RegistryUri} [registryUri] - (Optional) The expected registry URI associated with the registry entry.
+ * 
+ * @returns {Promise<{ isValid: boolean; message: string }>} 
+ * - A result object containing:
+ *   - `isValid`: A boolean indicating whether the verification was successful.
+ *   - `message`: A message describing the outcome of the verification.
+ * 
+ * @throws {Error} - If an unexpected error occurs during the verification process.
+ * 
+ * @example
+ * // Example Usage:
+ * const registryEntryUri = "cord:3xyz123" as EntryUri;
+ * const digest = "0xabcdef..." as HexString;
+ * const creatorUri = "did:cord:3F7HsGqJPyz..." as DidUri;
+ * const registryUri = "cord:registry:xyz" as RegistryUri;
+ * 
+ * const result = await verifyAgainstInputProperties(
+ *   registryEntryUri,
+ *   digest,
+ *   creatorUri,
+ *   registryUri
+ * );
+ * 
+ * console.log(result.isValid);  // true or false
+ * console.log(result.message);  // 'Digest properties provided are valid and match...'
+ *
+ */
+export async function verifyAgainstInputProperties(
+  registryEntryUri: EntryUri,
+  digest: HexString,
+  creatorUri?: DidUri,
+  registryUri?: RegistryUri,
+): Promise<{ isValid: boolean; message: string }> {
+  try {
+    const registryEntryStatus = await fetchRegistryEntryDetailsFromChain(registryEntryUri);
+    const registryEntryObj = uriToEntryIdAndDigest(registryEntryUri);
+    const entryUri = identifierToUri(registryEntryObj.identifier);
+
+    if (!registryEntryStatus) {
+      return {
+        isValid: false,
+        message: `Registry Entry details for "${digest}" not found.`,
+      }
+    }
+
+    console.log("uri", entryUri, "digest", digest, "creatorUri", creatorUri, "registryUri", registryUri);
+
+    if (digest !== registryEntryStatus.digest) {
+      return {
+        isValid: false,
+        message: 'Digest does not match with Registry Entry Digest.',
+      }
+    }
+
+    if (registryEntryStatus?.revoked) {
+      return {
+        isValid: false,
+        message: `Registry Entry "${registryEntryUri}" Revoked.`,
+      }
+    }
+
+    if (entryUri !== registryEntryStatus.uri) {
+      return {
+        isValid: false,
+        message: 'Registry Entry and Chain Entry URI details does not match.',
+      }
+    }
+  
+    if (creatorUri) {
+      if (creatorUri !== registryEntryStatus.creatorUri) {
+        return {
+          isValid: false,
+          message: 'Registry Entry and Digest creator does not match.',
+        }
+      }
+    }
+
+    if (registryUri) {
+      if (registryUri !== registryEntryStatus.registryUri) {
+        return {
+          isValid: false,
+          message: 'Registry Entry and Chain Registry URI does not match.',
+        }
+      }
+    }
+
+    return {
+      isValid: true,
+      message:
+        'Digest properties provided are valid and matches the registry entry details.',
+    }
+  } catch (error) {
+    if (error instanceof Error) {
+      return {
+        isValid: false,
+        message: `Error verifying properties: ${error}`,
+      }
+    }
+    return {
+      isValid: false,
+      message: 'An unknown error occurred while verifying the properties.',
+    }
+  }
 }
