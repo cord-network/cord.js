@@ -9,6 +9,8 @@ CORD.js is a JavaScript library that provides a collection of classes and method
     - [Statement Method](#statement-method)
     - [Network Score Method](#network-score-method)
     - [Asset Method](#asset-method)
+    - [Registry Method](#registry-method)
+    - [Entries Method](#entries-method)
 - [Consuming the SDK in Your Project](#consuming-the-sdk-in-your-project)
 
 ---
@@ -36,6 +38,12 @@ To build the SDK and see changes, follow these steps:
 ## Experimenting with SDK Methods
 ## Demo Methods
 Once the SDK is built, you can experiment with the provided methods.
+
+To experiment the SDK locally, a connection is required a existing CORD network. 
+It is also possible to run a CORD network locally. 
+Please follow the documentation mentioned at [CORD](https://github.com/dhiway/cord) repository.
+
+
 
 ## Statement Method:
 
@@ -66,6 +74,30 @@ To run the asset demo, execute the following command:
 ```bash
 yarn demo-asset
 ```
+
+## Registry Method:
+
+Registry & Entries modules are part of the Decentralised Directory (DeDi).
+
+
+The `demo-registry` method showcases methods related to registry.
+
+To run the registry demo, execute the following command:
+
+```bash
+yarn demo-registry
+```
+
+## Entries Method:
+
+The `demo-registry-entries` method showcases methods related to entries.
+
+To run the asset demo, execute the following command:
+
+```bash
+yarn demo-registry-entries
+```
+
 
 The output of each demo script will demonstrate the functionality of the corresponding method. For a detailed structure of the demo scripts, refer to the source code.
 
