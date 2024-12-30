@@ -505,6 +505,11 @@ declare module '@polkadot/api-base/types/events' {
        **/
       RegistryEntryCreated: AugmentedEvent<ApiType, [creator: AccountId32, registryId: Bytes, registryEntryId: Bytes], { creator: AccountId32, registryId: Bytes, registryEntryId: Bytes }>;
       /**
+       * A existing registry entry ownership has been updated.
+       * \[updater, new_owner, registry_entry_identifier\]
+       **/
+      RegistryEntryOwnershipUpdated: AugmentedEvent<ApiType, [updater: AccountId32, newOwner: AccountId32, registryEntryId: Bytes], { updater: AccountId32, newOwner: AccountId32, registryEntryId: Bytes }>;
+      /**
        * A existing registry entry has been reinstated.
        * \[updater, registry_enrtry_identifier\]
        **/

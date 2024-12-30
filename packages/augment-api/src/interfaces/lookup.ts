@@ -1234,6 +1234,11 @@ export default {
       },
       RegistryEntryReinstated: {
         updater: 'AccountId32',
+        registryEntryId: 'Bytes',
+      },
+      RegistryEntryOwnershipUpdated: {
+        updater: 'AccountId32',
+        newOwner: 'AccountId32',
         registryEntryId: 'Bytes'
       }
     }
@@ -2779,7 +2784,13 @@ export default {
       },
       reinstate: {
         registryEntryId: 'Bytes',
-        authorization: 'Bytes'
+        authorization: 'Bytes',
+      },
+      update_ownership: {
+        registryEntryId: 'Bytes',
+        authorization: 'Bytes',
+        newOwner: 'AccountId32',
+        newOwnerAuthorization: 'Bytes'
       }
     }
   },
@@ -3795,7 +3806,7 @@ export default {
    * Lookup472: pallet_entries::pallet::Error<T>
    **/
   PalletEntriesError: {
-    _enum: ['InvalidIdentifierLength', 'InvalidRegistryEntryIdentifier', 'UnauthorizedOperation', 'RegistryEntryIdentifierAlreadyExists', 'RegistryEntryIdentifierDoesNotExist', 'RegistryEntryNotRevoked']
+    _enum: ['InvalidIdentifierLength', 'InvalidRegistryEntryIdentifier', 'UnauthorizedOperation', 'RegistryEntryIdentifierAlreadyExists', 'RegistryEntryIdentifierDoesNotExist', 'RegistryEntryNotRevoked', 'NewOwnerCannotBeSameAsExistingOwner']
   },
   /**
    * Lookup473: pallet_schema_accounts::types::SchemaEntry<bounded_collections::bounded_vec::BoundedVec<T, S>, primitive_types::H256, sp_core::crypto::AccountId32>
