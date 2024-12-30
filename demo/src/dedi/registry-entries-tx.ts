@@ -242,6 +242,45 @@ async function main() {
   } else {
     console.log(`🚫 Verification failed! - "${verificationResult.message}" 🚫`)
   }
+
+  // Setup a account to be added as a new onwer.
+  const { account: assertIdentity } = await createAccount()
+  console.log(`\n🏦  New Owner Member (${assertIdentity.type})`)
+
+  // Add a delegate with ASSERT permission
+  const assertPermission: Cord.RegistryPermissionType = Cord.RegistryPermission.ASSERT;
+  const registryAssertAuthProperties =
+    await Cord.Registries.registryAuthorizationProperties(
+      registry.uri,
+      assertIdentity.address,
+      assertPermission,
+      authorIdentity.address
+    )
+
+  console.dir(registryAssertAuthProperties, {
+    depth: null,
+    colors: true,
+  })
+
+  const newOwnerAssertAuthorizationUri = await Cord.Registries.dispatchDelegateAuthorization(
+    registryAssertAuthProperties,
+    registry.authorizationUri,
+    authorIdentity
+  )
+
+  console.log(`\n✅ Registry Authorization added with ASSERT permission - ${newOwnerAssertAuthorizationUri} - added!`)
+
+  // Transfer the ownership of the entry to new owner
+  const entryOwnershipUpdatedUri = 
+    await Cord.Entries.dispatchUpdateOwnershipToChain(
+      registryEntryDetails.uri,
+      registryEntryDetails.authorizationUri,
+      assertIdentity.address,
+      newOwnerAssertAuthorizationUri,
+      authorIdentity
+    );
+
+  console.log(`\n✅ Registry Entry Ownership Updated - ${assertIdentity.AccountId}!`)
 }
 
 main()

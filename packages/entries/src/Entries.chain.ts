@@ -52,7 +52,8 @@ import {
     RegistryAuthorizationUri,
     IRegistryEntryChainStorage,
     RegistryUri,
-    DidUri
+    DidUri,
+    CordAddress
 } from '@cord.network/types';
 
 import { Chain } from '@cord.network/network';
@@ -398,8 +399,6 @@ export function decodeRegistryEntryDetailsFromChain(
     ) as RegistryUri
   };
 
-  console.log("chainRegistryEntry after", registryEntry);
-
   return registryEntry;
 }
 
@@ -494,4 +493,94 @@ export async function fetchRegistryEntryDetailsFromChain(
   }
 
   return entryDetails;
+}
+
+
+/**
+ * Dispatches an extrinsic to update the ownership of a registry entry on the blockchain.
+ * This function sends an on-chain transaction to transfer ownership of a specified registry
+ * entry to a new owner, using the provided authorization identifiers.
+ *
+ * @param {EntryUri} registryEntryUri - 
+ * The URI of the registry entry for which ownership is being updated.
+ * 
+ * @param {RegistryAuthorizationUri} authorizationUri - 
+ * The URI of the authorization linked to the current owner of the registry entry.
+ *
+ * @param {CordAddress} newOwnerAccount - 
+ * The address of the new owner to whom ownership is being transferred.
+ * 
+ * @param {RegistryAuthorizationUri} newOwnerAuthorizationUri - 
+ * The URI of the authorization linked to the new owner.
+ *
+ * @param {CordKeyringPair} authorAccount - 
+ * The account of the current owner or authorized delegate, used to authorize and sign the transaction.
+ * 
+ * @returns {Promise<EntryUri>} 
+ * - Returns a promise that resolves to the URI of the registry entry after successfully updating ownership.
+ * 
+ * @throws {SDKErrors.CordDispatchError} 
+ * Throws an error if the registry entry does not exist or if there is any issue while dispatching the extrinsic to the chain.
+ * 
+ * @example
+ * // Example Usage:
+ * const registryEntryUri = "someEntryUri";
+ * const authorizationUri = "someAuthorizationUri";
+ * const newOwnerAccount = "5Dw8p5aZxtLKLDBnYP5r9ePNSwD7FozknBhXtXaV4awZ6kfK";
+ * const newOwnerAuthorizationUri = "newOwnerAuthorizationUri";
+ * const authorAccount = authorKeyringPair;
+ * 
+ * try {
+ *   const updatedUri = await dispatchUpdateOwnershipToChain(
+ *     registryEntryUri,
+ *     authorizationUri,
+ *     newOwnerAccount,
+ *     newOwnerAuthorizationUri,
+ *     authorAccount
+ *   );
+ *   console.log(updatedUri); // Outputs the updated registry entry URI.
+ * } catch (error) {
+ *   console.error(error.message); // Handle the error accordingly.
+ * }
+ * 
+ */
+export async function dispatchUpdateOwnershipToChain(
+  registryEntryUri: EntryUri,
+  authorizationUri: RegistryAuthorizationUri,
+  newOwnerAccount:  CordAddress,
+  newOwnerAuthorizationUri: RegistryAuthorizationUri,
+  authorAccount: CordKeyringPair,
+): Promise<EntryUri> {
+  try {
+
+    const api = ConfigService.get('api');
+    const registryEntryObj = uriToEntryIdAndDigest(registryEntryUri);
+
+    const registryEntryId = registryEntryObj.identifier;
+    const authorizationId = uriToIdentifier(authorizationUri);
+    const newOwnerAuthorizationId = uriToIdentifier(newOwnerAuthorizationUri);
+
+    const registryEntryExists = await isRegistryEntryStored(registryEntryId);
+    if (!registryEntryExists) {
+      throw new SDKErrors.CordDispatchError(
+        `Registry Entry does not exists at URI: "${registryEntryUri}".`
+      );
+    }
+
+    const extrinsic = api.tx.entries.updateOwnership(
+        registryEntryId,
+        authorizationId,
+        newOwnerAccount,
+        newOwnerAuthorizationId,
+    );
+
+    await Chain.signAndSubmitTx(extrinsic, authorAccount);
+    return registryEntryUri;
+} catch (error) {
+    const errorMessage =
+        error instanceof Error ? error.message : JSON.stringify(error);
+    throw new SDKErrors.CordDispatchError(
+        `Error dispatching to chain: "${JSON.stringify(errorMessage)}".`
+    );
+  }
 }

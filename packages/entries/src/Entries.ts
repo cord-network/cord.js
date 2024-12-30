@@ -434,9 +434,7 @@ export async function verifyAgainstInputProperties(
         message: `Registry Entry details for "${digest}" not found.`,
       }
     }
-
-    console.log("uri", entryUri, "digest", digest, "creatorUri", creatorUri, "registryUri", registryUri);
-
+    
     if (digest !== registryEntryStatus.digest) {
       return {
         isValid: false,
