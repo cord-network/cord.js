@@ -1888,6 +1888,53 @@ declare module '@polkadot/api-base/types/submittable' {
        * ```
        **/
       update: AugmentedSubmittable<(registryEntryId: Bytes | string | Uint8Array, authorization: Bytes | string | Uint8Array, digest: H256 | string | Uint8Array, blob: Option<Bytes> | null | Uint8Array | Bytes | string) => SubmittableExtrinsic<ApiType>, [Bytes, Bytes, H256, Option<Bytes>]>;
+      /**
+       * Updates the ownership of an existing Registry Entry.
+       * 
+       * This function allows an authorized user (creator or admin) to update the ownership
+       * of an existing Registry Entry. Ownership can be transferred to a new owner within
+       * the same Registry.
+       * 
+       * # Arguments
+       * * `origin` - The origin of the call, which must be a signed account (updater).
+       * * `registry_entry_id` - The unique identifier of the Registry Entry to update ownership.
+       * * `authorization` - The authorization identifier that links the updater to the Registry.
+       * * `new_owner` - The account identifier of the new owner of the Registry Entry.
+       * * `new_owner_authorization` - The authorization identifier that links the new owner to
+       * the Registry.
+       * 
+       * # Conditions
+       * - Only the current creator (owner) of the Registry Entry or an admin of the Registry can
+       * perform this operation.
+       * - The new owner must be authorized within the same Registry.
+       * - The new owner cannot be the same as the current owner to avoid unnecessary storage
+       * writes.
+       * 
+       * # Errors
+       * This function returns an error in the following cases:
+       * * `RegistryEntryIdentifierDoesNotExist` - If the specified `registry_entry_id` does not
+       * exist.
+       * * `UnauthorizedOperation` - If the caller does not have permission to update the
+       * ownership or if the new owner is not authorized under the same Registry.
+       * * `NewOwnerCannotBeSameAsExistingOwner` - If the new owner is the same as the current
+       * owner.
+       * 
+       * # Events
+       * Emits the `Event::RegistryEntryOwnershipUpdated` event upon successful ownership update.
+       * This event includes the `updater`, the `new_owner`, and the `registry_entry_id`.
+       * 
+       * # Example
+       * ```rust
+       * update_ownership(
+       * origin,
+       * registry_entry_id,
+       * authorization,
+       * new_owner,
+       * new_owner_authorization,
+       * )?;
+       * ```
+       **/
+      updateOwnership: AugmentedSubmittable<(registryEntryId: Bytes | string | Uint8Array, authorization: Bytes | string | Uint8Array, newOwner: AccountId32 | string | Uint8Array, newOwnerAuthorization: Bytes | string | Uint8Array) => SubmittableExtrinsic<ApiType>, [Bytes, Bytes, AccountId32, Bytes]>;
     };
     grandpa: {
       /**
@@ -3236,7 +3283,6 @@ declare module '@polkadot/api-base/types/submittable' {
        * 
        * # Parameters
        * - `origin`: The origin of the transaction, signed by the creator.
-       * - `registry_id`: A unique code created to identify the registry.
        * - `digest`: The digest representing the registry data to be created.
        * - `schema_id`: (Optional) A unique code represnting the Schema.
        * - `blob`: (Optional) Metadata or data associated with the registry.
@@ -3259,7 +3305,7 @@ declare module '@polkadot/api-base/types/submittable' {
        * - `Create`: Emitted when a new registry is successfully created. It includes the
        * registry identifier, the creator's identifier, and the authorization ID.
        **/
-      create: AugmentedSubmittable<(registryId: Bytes | string | Uint8Array, digest: H256 | string | Uint8Array, schemaId: Option<Bytes> | null | Uint8Array | Bytes | string, blob: Option<Bytes> | null | Uint8Array | Bytes | string) => SubmittableExtrinsic<ApiType>, [Bytes, H256, Option<Bytes>, Option<Bytes>]>;
+      create: AugmentedSubmittable<(digest: H256 | string | Uint8Array, schemaId: Option<Bytes> | null | Uint8Array | Bytes | string, blob: Option<Bytes> | null | Uint8Array | Bytes | string) => SubmittableExtrinsic<ApiType>, [H256, Option<Bytes>, Option<Bytes>]>;
       /**
        * Reinstates a revoked registry, making it active again.
        * 

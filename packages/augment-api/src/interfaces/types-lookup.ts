@@ -1380,7 +1380,13 @@ declare module '@polkadot/types/lookup' {
       readonly updater: AccountId32;
       readonly registryEntryId: Bytes;
     } & Struct;
-    readonly type: 'RegistryEntryCreated' | 'RegistryEntryUpdated' | 'RegistryEntryRevoked' | 'RegistryEntryReinstated';
+    readonly isRegistryEntryOwnershipUpdated: boolean;
+    readonly asRegistryEntryOwnershipUpdated: {
+      readonly updater: AccountId32;
+      readonly newOwner: AccountId32;
+      readonly registryEntryId: Bytes;
+    } & Struct;
+    readonly type: 'RegistryEntryCreated' | 'RegistryEntryUpdated' | 'RegistryEntryRevoked' | 'RegistryEntryReinstated' | 'RegistryEntryOwnershipUpdated';
   }
 
   /** @name PalletSchemaAccountsEvent (96) */
@@ -2975,7 +2981,6 @@ declare module '@polkadot/types/lookup' {
     } & Struct;
     readonly isCreate: boolean;
     readonly asCreate: {
-      readonly registryId: Bytes;
       readonly digest: H256;
       readonly schemaId: Option<Bytes>;
       readonly blob: Option<Bytes>;
@@ -3036,7 +3041,14 @@ declare module '@polkadot/types/lookup' {
       readonly registryEntryId: Bytes;
       readonly authorization: Bytes;
     } & Struct;
-    readonly type: 'Create' | 'Update' | 'Revoke' | 'Reinstate';
+    readonly isUpdateOwnership: boolean;
+    readonly asUpdateOwnership: {
+      readonly registryEntryId: Bytes;
+      readonly authorization: Bytes;
+      readonly newOwner: AccountId32;
+      readonly newOwnerAuthorization: Bytes;
+    } & Struct;
+    readonly type: 'Create' | 'Update' | 'Revoke' | 'Reinstate' | 'UpdateOwnership';
   }
 
   /** @name PalletSchemaAccountsCall (263) */
@@ -4265,7 +4277,8 @@ declare module '@polkadot/types/lookup' {
     readonly isRegistryEntryIdentifierAlreadyExists: boolean;
     readonly isRegistryEntryIdentifierDoesNotExist: boolean;
     readonly isRegistryEntryNotRevoked: boolean;
-    readonly type: 'InvalidIdentifierLength' | 'InvalidRegistryEntryIdentifier' | 'UnauthorizedOperation' | 'RegistryEntryIdentifierAlreadyExists' | 'RegistryEntryIdentifierDoesNotExist' | 'RegistryEntryNotRevoked';
+    readonly isNewOwnerCannotBeSameAsExistingOwner: boolean;
+    readonly type: 'InvalidIdentifierLength' | 'InvalidRegistryEntryIdentifier' | 'UnauthorizedOperation' | 'RegistryEntryIdentifierAlreadyExists' | 'RegistryEntryIdentifierDoesNotExist' | 'RegistryEntryNotRevoked' | 'NewOwnerCannotBeSameAsExistingOwner';
   }
 
   /** @name PalletSchemaAccountsSchemaEntry (473) */

@@ -220,10 +220,8 @@ export async function dispatchCreateRegistryToChain(
 
     try {
         const api = ConfigService.get('api'); 
-        const registryId = uriToIdentifier(registryDetails.uri);
 
         const extrinsic = api.tx.registries.create(
-            registryId,
             registryDetails.digest,
             schemaId,
             registryDetails.blob

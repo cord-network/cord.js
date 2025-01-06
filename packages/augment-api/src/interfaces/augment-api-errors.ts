@@ -802,6 +802,10 @@ declare module '@polkadot/api-base/types/errors' {
        **/
       InvalidRegistryEntryIdentifier: AugmentedError<ApiType>;
       /**
+       * New Registry Entry owner cannot be same as existing owner.
+       **/
+      NewOwnerCannotBeSameAsExistingOwner: AugmentedError<ApiType>;
+      /**
        * Registry Entry Identifier Already Exists
        **/
       RegistryEntryIdentifierAlreadyExists: AugmentedError<ApiType>;
